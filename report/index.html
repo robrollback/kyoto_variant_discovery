@@ -1,0 +1,319 @@
+<!---->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><!-- InstanceBegin template="/Templates/mainTemplate.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Canadian Center for Computational Genomics (C3G) - DNA-Seq Analysis Report</title>
+
+<!-- InstanceEndEditable -->
+  <link rel="stylesheet" href="css/style.css" type="text/css" />
+<script src="_js/scripts.js" ></script>
+<!-- InstanceBeginEditable name="head" -->
+<!-- InstanceEndEditable -->
+</head>
+<body class="oneColFixCtrHdr">
+
+<div id="container">
+  <div id="header"><a name="top"/> 
+  <ul class="utilMenu"><li><a href="http://computationalgenomics.ca/">Home</a></li><li><a href="mailto:bioinformatics.genome@mail.mcgill.ca">Contact</a></li></ul>
+  <!-- end #header -->
+  </div>
+  <div id="banner">
+  <a href="http://computationalgenomics.ca/"><img src="images/banner/banner0_en.png" width="882" height="180" border="0" /></a>
+  </div>
+
+  <div id="mainMenu"></div>
+
+  <div id="mainContent">
+
+<h1>DNA-Seq Analysis Report</h1>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#analysis-and-results">Analysis and Results</a><ul>
+<li><a href="#read-trimming-and-clipping-of-adapters">Read Trimming and Clipping of Adapters</a></li>
+<li><a href="#read-alignment-to-a-reference-genome">Read Alignment to a Reference Genome</a></li>
+<li><a href="#read-alignment-improvement">Read Alignment Improvement</a><ul>
+<li><a href="#realigning-short-insertions-and-deletions-indels">Realigning Short Insertions and Deletions (INDELs)</a></li>
+<li><a href="#fixing-read-mates">Fixing Read Mates</a></li>
+<li><a href="#marking-duplicates">Marking Duplicates</a></li>
+<li><a href="#base-quality-recalibration">Base Quality Recalibration</a></li>
+</ul></li>
+<li><a href="#sequencing-and-alignment-metrics-per-sample">Sequencing and Alignment Metrics per Sample</a></li>
+</ul></li>
+<li><a href="#analysis-configuration-parameters">Analysis Configuration Parameters</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+
+<h2 id="introduction">Introduction</h2>
+<p>This document contains the description of the current MUGQIC DNA-Seq analysis. The information presented here reflects the current state of the analysis as of 2016-02-27.</p>
+<h2 id="analysis-and-results">Analysis and Results</h2>
+<h3 id="read-trimming-and-clipping-of-adapters">Read Trimming and Clipping of Adapters</h3>
+<p>Reads are trimmed from the 3' end to have a phred score of at least <strong>30</strong>. Illumina sequencing adapters are removed from the reads, and all reads are required to have a length of at least <strong>50</strong> bp. Trimming and clipping are performed using <a href="http://www.usadellab.org/cms/index.php?page=trimmomatic">Trimmomatic</a> <span class="citation">(Bolger, Lohse, and Usadel 2014)</span>.</p>
+<table>
+<caption>Trimming Statistics per Readset (<a href="trimReadsetTable.tsv">download full table</a>)</caption>
+<thead>
+<tr class="header">
+<th align="left">Sample</th>
+<th align="left">Readset</th>
+<th align="right">Raw Paired Reads #</th>
+<th align="right">Surviving Paired Reads #</th>
+<th align="right">Surviving Paired Reads %</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">NA12878</td>
+<td align="left">NA12878_S1_L001</td>
+<td align="right">199,926,151</td>
+<td align="right">197,274,901</td>
+<td align="right">98.7</td>
+</tr>
+<tr class="even">
+<td align="left">NA12878</td>
+<td align="left">NA12878_S1_L002</td>
+<td align="right">196,779,406</td>
+<td align="right">194,265,429</td>
+<td align="right">98.7</td>
+</tr>
+<tr class="odd">
+<td align="left">NA12878</td>
+<td align="left">NA12878_S1_L003</td>
+<td align="right">198,734,315</td>
+<td align="right">196,196,656</td>
+<td align="right">98.7</td>
+</tr>
+<tr class="even">
+<td align="left">NA12878</td>
+<td align="left">NA12878_S1_L004</td>
+<td align="right">197,606,617</td>
+<td align="right">195,013,207</td>
+<td align="right">98.7</td>
+</tr>
+<tr class="odd">
+<td align="left">NA12891</td>
+<td align="left">NA12891_S1_L005</td>
+<td align="right">196,621,011</td>
+<td align="right">194,797,306</td>
+<td align="right">99.1</td>
+</tr>
+<tr class="even">
+<td align="left">NA12891</td>
+<td align="left">NA12891_S1_L006</td>
+<td align="right">195,733,015</td>
+<td align="right">193,809,658</td>
+<td align="right">99.0</td>
+</tr>
+<tr class="odd">
+<td align="left">NA12891</td>
+<td align="left">NA12891_S1_L007</td>
+<td align="right">196,193,135</td>
+<td align="right">194,326,013</td>
+<td align="right">99.0</td>
+</tr>
+<tr class="even">
+<td align="left">NA12891</td>
+<td align="left">NA12891_S1_L008</td>
+<td align="right">197,254,871</td>
+<td align="right">195,367,422</td>
+<td align="right">99.0</td>
+</tr>
+<tr class="odd">
+<td align="left">NA12892</td>
+<td align="left">NA12892_S1_L004</td>
+<td align="right">214,461,918</td>
+<td align="right">212,659,602</td>
+<td align="right">99.2</td>
+</tr>
+<tr class="even">
+<td align="left">NA12892</td>
+<td align="left">NA12892_S1_L005</td>
+<td align="right">213,955,162</td>
+<td align="right">212,160,320</td>
+<td align="right">99.2</td>
+</tr>
+<tr class="odd">
+<td align="left">NA12892</td>
+<td align="left">NA12892_S1_L006</td>
+<td align="right">210,836,604</td>
+<td align="right">208,934,117</td>
+<td align="right">99.1</td>
+</tr>
+<tr class="even">
+<td align="left">NA12892</td>
+<td align="left">NA12892_S1_L007</td>
+<td align="right">212,240,533</td>
+<td align="right">210,569,426</td>
+<td align="right">99.2</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Raw Paired Reads #: number of Paired Reads obtained from the sequencer</li>
+<li>Surviving Paired Reads #: number of Remaining Paired Reads after the trimming step</li>
+<li>Surviving Paired Reads %: percentage of Surviving Paired Reads / Raw Paired Reads</li>
+</ul>
+<h3 id="read-alignment-to-a-reference-genome">Read Alignment to a Reference Genome</h3>
+<p>The filtered reads are aligned to a reference genome. The genome used in this analysis is <strong><em>Homo_sapiens</em></strong> assembly <strong>GRCh37</strong>. Each readset is aligned using <a href="http://bio-bwa.sourceforge.net/">BWA</a> [<span class="citation">Li and Durbin (2010)</span>] which creates a Binary Alignment Map file (.bam). Then, all readset BAM files from the same sample are merged into a single global BAM file using <a href="http://broadinstitute.github.io/picard/">Picard</a>.</p>
+<p>BWA is a fast light-weighted tool which aligns relatively short sequences (queries) to a sequence database (target), such as the human reference genome. It's based on the Burrows-Wheeler Transform (BWT). BWA is designed for short queries up to ~200 bp with low error rate (&lt; 3%). It does gapped global alignment, supports paired-end reads, and is one of the fastest short read alignment algorithms to date while also visiting suboptimal hits.</p>
+<h3 id="read-alignment-improvement">Read Alignment Improvement</h3>
+<p>Unfortunately, there is no prefect aligner to date. The alignment step is really sensitive to the aligner parameters as well as technical and biological variations. To increase the quality and speed of subsequent variant calling, we performed a series of alignment improvement procedures. These procedures consist of realigning the surrounding short insertion or deletion, fixing possible read mate discrepancy due to realignment, marking duplicated reads and recalibrating read base quality.</p>
+<h4 id="realigning-short-insertions-and-deletions-indels">Realigning Short Insertions and Deletions (INDELs)</h4>
+<p>INDELs in reads (especially near the ends) can trick the mappers into mis-aligning with mismatches. These artifacts resulting from mismatches can harm base quality recalibration and variant detection. Realignment around INDELs helps to improve the accuracy of several downstream steps.</p>
+<p>Insertion and deletion realignment is performed on regions where multiple base mismatches are preferred over INDELs by the aligner since it appears to be less costly for the algorithm. Such regions will introduce false positive variant calls which may be filtered out by realigning those regions properly. Mainly realignment will occurs in 3 different region types:</p>
+<ol style="list-style-type: decimal">
+<li>Known sites (e.g. dbSNP, 1000 Genomes)</li>
+<li>INDELs seen in original alignments (in CIGARs)</li>
+<li>Sites where evidence suggests a hidden INDEL</li>
+</ol>
+<p>Realignment is done using <a href="https://www.broadinstitute.org/gatk/">GATK</a> <span class="citation">(DePristo et al. 2011)</span>.</p>
+<h4 id="fixing-read-mates">Fixing Read Mates</h4>
+<p>Once local regions are realigned, the read mate coordinates of the aligned reads need to be recalculated since the reads are realigned at positions that differ from their original alignment. Fixing the read mate positions is performed using <a href="http://broadinstitute.github.io/picard/">Picard</a>.</p>
+<h4 id="marking-duplicates">Marking Duplicates</h4>
+<p>Sequencing experiment includes several PCR amplification steps, which could induce coverage bias during the library construction. If this bias is not taken into account it could generate high level of false positives and false negatives during the variant calling steps (SNV, SV and CNV). Thus, removing or marking read duplicates is an important step of the sequencing analysis. Aligned reads are duplicates if they have the same 5' alignment positions (for both mates in the case of paired-end reads). All but the best pair (based on alignment score) will be marked as a duplicate in the .bam file. Duplicates reads will be excluded in the subsequent analysis. Marking duplicates is performed using <a href="http://broadinstitute.github.io/picard/">Picard</a>.</p>
+<h4 id="base-quality-recalibration">Base Quality Recalibration</h4>
+<p>This step allows recalibrating base quality scores of sequencing-by-synthesis reads in an aligned BAM file. After recalibration, the quality scores in the QUAL field in each read in the output BAM are more accurate in that the reported quality score is closer to its actual probability of mismatching the reference genome. Moreover, the recalibration tool attempts to correct for variation in quality with machine cycle and sequence context, and by doing so provides not only more accurate quality scores but also more widely dispersed ones. The recalibration is done not only for the well-known base quality scores but also for base insertion and base deletion quality scores. These are per-base quantities which estimate the probability that the next base in the read was mis-incorporated or mis-deleted (due to slippage, for example).</p>
+<p>The recalibration process is accomplished by analyzing the covariation among several features of a base. For example:</p>
+<ul>
+<li>Reported quality score</li>
+<li>The position within the read</li>
+<li>The preceding and current nucleotide (sequencing chemistry effect) observed by the sequencing machine</li>
+</ul>
+<p>These covariates are then subsequently applied through a piecewise tabular correction to recalibrate the quality scores of all reads in a BAM file. The recalibration process is performed using <a href="https://www.broadinstitute.org/gatk/">GATK</a> <span class="citation">(DePristo et al. 2011)</span>.</p>
+<h3 id="sequencing-and-alignment-metrics-per-sample">Sequencing and Alignment Metrics per Sample</h3>
+<p>General summary statistics are provided per sample. Sample readsets are merged for clarity.</p>
+<table style="width:94%;">
+<caption>Sequencing and Alignment Statistics per Sample (<strong>partial table</strong>; <a href="sequenceAlignmentTable.tsv">download full table</a>)</caption>
+<colgroup>
+<col width="8%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Sample</th>
+<th align="right">Raw Reads #</th>
+<th align="right">Surviving Reads #</th>
+<th align="right">Surviving %</th>
+<th align="right">Mapped Reads</th>
+<th align="right">Mapped %</th>
+<th align="right">Not Duplicate Reads</th>
+<th align="right">Duplicate Reads</th>
+<th align="right">Duplicate %</th>
+<th align="left">Pair Orientation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">NA12878</td>
+<td align="right">1,586,092,978</td>
+<td align="right">1,565,500,386</td>
+<td align="right">98.7</td>
+<td align="right">392,617,624</td>
+<td align="right">25.1</td>
+<td align="right">385,269,470</td>
+<td align="right">7,348,154</td>
+<td align="right">1.9</td>
+<td align="left">FR</td>
+</tr>
+<tr class="even">
+<td align="left">NA12891</td>
+<td align="right">1,571,604,064</td>
+<td align="right">1,556,600,798</td>
+<td align="right">99.0</td>
+<td align="right">388,460,938</td>
+<td align="right">25.0</td>
+<td align="right">378,798,587</td>
+<td align="right">9,662,351</td>
+<td align="right">2.5</td>
+<td align="left">FR</td>
+</tr>
+<tr class="odd">
+<td align="left">NA12892</td>
+<td align="right">1,702,988,434</td>
+<td align="right">1,688,646,930</td>
+<td align="right">99.2</td>
+<td align="right">419,775,730</td>
+<td align="right">24.9</td>
+<td align="right">410,375,882</td>
+<td align="right">9,399,848</td>
+<td align="right">2.2</td>
+<td align="left">FR</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Raw Reads: total number of reads obtained from the sequencer</li>
+<li>Surviving Reads: number of remaining reads after the trimming step</li>
+<li>Surviving %: Surviving reads / Raw reads</li>
+<li>Mapped reads: number of aligned reads to the reference</li>
+<li>Mapped %: Mapped reads / Surviving reads</li>
+<li>Not Duplicate Reads: number of not duplicated read entries</li>
+<li>Duplicate Reads: number of duplicated read entries providing alternative coordinates</li>
+<li>Duplicate %: Duplicate / Mapped reads</li>
+<li>Pair Orientation: library paired-end read design</li>
+<li>Mean Insert Size: mean distance between the left most base position of the read1 and the right most base position of the read 2</li>
+<li>Standard Deviation: standard deviation of distance between the left most base position of the read1 and the right most base position of the read 2</li>
+<li>Mean Coverage: total number of aligned reads / (genome size or capture region size)</li>
+<li>%_bases_above_10: total number of bases with a coverage &gt;= 10x / (genome size or capture region size)</li>
+<li>%_bases_above_25: total number of bases with a coverage &gt;= 25x / (genome size or capture region size)</li>
+<li>%_bases_above_50: total number of bases with a coverage &gt;= 50x / (genome size or capture region size)</li>
+<li>%_bases_above_75: total number of bases with a coverage &gt;= 75x / (genome size or capture region size)</li>
+<li>%_bases_above_100: total number of bases with a coverage &gt;= 100x / (genome size or capture region size)</li>
+<li>%_bases_above_500: total number of bases with a coverage &gt;= 500x / (genome size or capture region size)</li>
+</ul>
+<h2 id="analysis-configuration-parameters">Analysis Configuration Parameters</h2>
+<p>All analysis parameters are described in this <a href="config.ini">configuration file</a>.</p>
+<h2 id="references">References</h2>
+<p><span /></p>
+<div id="refs" class="references">
+<div id="ref-trimmomatic">
+<p>Bolger, A.M., M. Lohse, and B. Usadel. 2014. “Trimmomatic: A Flexible Trimmer for Illumina Sequence Data.” <em>Bioinformatics</em> 30 (15): 2114–20. doi:<a href="https://doi.org/10.1093/bioinformatics/btu170">10.1093/bioinformatics/btu170</a>.</p>
+</div>
+<div id="ref-gatk">
+<p>DePristo et al. 2011. “A Framework for Variation Discovery and Genotyping Using Next-Generation DNA Sequencing Data.” <em>Nature Genetics</em> 43 (5): 491–98. doi:<a href="https://doi.org/10.1038/ng.806">10.1038/ng.806</a>.</p>
+</div>
+<div id="ref-bwa">
+<p>Li, H., and R. Durbin. 2010. “Fast and Accurate Long-Read Alignment with Burrows–Wheeler Transform.” <em>Bioinformatics</em> 26 (5): 589–95. doi:<a href="https://doi.org/10.1093/bioinformatics/btp698">10.1093/bioinformatics/btp698</a>.</p>
+</div>
+</div>
+
+
+<!-- InstanceEndEditable -->
+
+  <div style="clear:both;"></div>
+  <!-- end #mainContent -->
+  </div>
+<div width="100%" id="logos">
+        <p>C3G is supported by the following organizations:</p>
+       <table class="footer" align="center" border="0" cellspacing="0" cellpadding="0" width="100%">
+          <tr>
+            <td width="20%" align="center" valign="top"><a href="http://www.mcgill.ca/" target="_blank"><img src="images/logo/logoMG.jpg" width="130" height="56" border="0" /></a></td>            
+            <td width="20%" align="center" valign="top"><a href="http://www.genomecanada.ca" target="_blank"><img src="images/logo/logoGC.jpg" width="81" height="51" border="0" /></a></td>
+            <td width="20%" align="center" valign="top"><a href="http://www.genomequebec.com" target="_blank"><img src="images/logo/logoGQ.jpg" width="95" height="56" border="0" /></a></td>
+            <td width="20%" align="center" valign="top"><a href="https://www.computecanada.ca/" target="_blank"><img src="images/logo/logoComputeCanada.png" width="128" height="24" border="0" /></a></td>
+            <td width="20%" align="center" valign="top"><a href="http://www.canarie.ca/" target="_blank"><img src="images/logo/logoCanarie.png" width="126" height="41" border="0" /></a></td>              
+          </tr>
+        </table>
+   </div>
+  <div id="footer">
+    <p>
+&copy; Copyright 2015-2016 Canadian Center for Computational Genomics <br>
+All Rights Reserved
+
+</p>
+  <!-- end #footer --></div>
+<!-- end #container --></div>
+</body>
+<!-- InstanceEnd --></html>
+
