@@ -65,13 +65,13 @@ Try these commands:
 
 **Explore the header**
 ```
-zcat x.gz | grep "^##"
+zcat cephPedigree.vqsr.vcf.gz | grep "^##"
 ``` 
-**What is the vcf format version?**
+***What is the vcf format version?***
 
-**What genome build was used for variant calling?**
+***What genome build was used for variant calling?***
 
-**What version of GATK Haplotype caller was used?**
+***What version of GATK Haplotype caller was used?***
 
 [solutions](solutions/_vcf_header.md)
 
@@ -151,7 +151,10 @@ Try command:
 ```
 gemini db_info cephPedigree.gemini.18.2.db
 ```
+
 Output: (For more information see [column descriptions](http://gemini.readthedocs.org/en/latest/content/database_schema.html))
+
+```
     table_name column shows whether information stored applies to:
         * variants
         * variant_impacts
@@ -167,6 +170,7 @@ Output: (For more information see [column descriptions](http://gemini.readthedoc
         * float - a number with decimal places (e.g. "call_rate")
         * blob - special data type interpreted by Gemini (genotype data)
         * bool - can be true or false
+```
 
 ###Explore variants in Gemini (and data check)
 
@@ -216,12 +220,12 @@ gemini query --header -q "SELECT * FROM variants WHERE \
     AND filter is NULL" \
     cephPedigree.gemini.18.2.db | column -t
 ```    
-Note: 
-    * addition of clinvar_disease_name is not NULL, meaning to look for variants with a clinvar annotation
+***Note:*** addition of clinvar_disease_name is not NULL, meaning to look for variants with a clinvar annotation
     
 Two variants are found with Clinvar annotations: [rs4244285](http://www.snpedia.com/index.php/Rs4244285) found in CYP2C19 and [rs1799853](https://www.snpedia.com/index.php/Rs1799853) found in CYP2C9 another p450 gene. 
     
 This generates a lot of columns let's focus the analysis to a specific set of columns related to dbsnp, the [ExAC](http://exac.broadinstitute.org/) control database, and clinvar
+
 ```
 gemini query --header --show-samples -q "SELECT rs_ids, aaf_adj_exac_afr, aaf_adj_exac_amr, aaf_adj_exac_eas, aaf_adj_exac_sas, clinvar_disease_name, clinvar_sig \
     FROM variants WHERE \ 
@@ -232,15 +236,16 @@ gemini query --header --show-samples -q "SELECT rs_ids, aaf_adj_exac_afr, aaf_ad
 
 ```
 
-Note:
-    * --show-samples argument generates columns displaying which samples have a variants and what type of variants
+***Note:*** --show-samples argument generates columns displaying which samples have a variants and what type of variants
 
 ***For this variant in which population(s) is this variant more frequent in?***
 
-afr = African
-amr = American
-eas = East Asian
-sas = South Asian
+```
+    afr = African
+    amr = American
+    eas = East Asian
+    sas = South Asian
+```
 
 [solutions](solutions/_population.md)
 
@@ -255,18 +260,18 @@ However, in cases where the answer is unknown, variant prioritization is not tri
 
 Gemini provides tools and annotations to investigate these types of scenarios, but still in caution must be taken in the prioritization of the variants.
 
-Study design e.g.
-    * Pedigrees :     de novo, autosomal recessive, autosomal dominant, compound heterozygotes
-    * Case-control :  burden/non-burden test
+    Study design e.g.
+        * Pedigrees :     de novo, autosomal recessive, autosomal dominant, compound heterozygotes
+        * Case-control :  burden/non-burden test
 
-Hypotheses e.g. :
-    * Complex disease : pathway analysis, protein interaction
-    * Rare disease: presence and low frequency in known population databases 
+    Hypotheses e.g. :
+        * Complex disease : pathway analysis, protein interaction
+        * Rare disease: presence and low frequency in known population databases 
 
-Some guidelines:
-    * Variants of interest should contain good sample based depth of coverage (default >10x and more important in exome data)
-    * Start with high impact variants or variants with high CADD scores(variants predicted functional, deleterious and pathogentic variants)
-    * Genomic features: if found within or near repeat regions, segmental duplications, etc.  Variant could be a false positive.
+    Some guidelines:
+        * Variants of interest should contain good sample based depth of coverage (default >10x and more important in exome data)
+        * Start with high impact variants or variants with high CADD scores(variants predicted functional, deleterious and pathogentic variants)
+        * Genomic features: if found within or near repeat regions, segmental duplications, etc.  Variant could be a false positive.
 
 ####Advanced Gemini querying
 
@@ -293,7 +298,8 @@ Subsequently the per sample genotype information can be also be filtered upon us
 
 Examples:
 Instead of listing 100 threshold filters on depth like below 
- 
+
+```
 gemini query -q "SELECT * FROM variants" \
                     --gt-filter "gt_depths.sample1 >= 20 AND \
                                   gt_depths.sample2 >= 20 AND \
@@ -301,16 +307,18 @@ gemini query -q "SELECT * FROM variants" \
                                   ...
                                   gt_depths.sample100 >= 20" \
                      extended_ped.db
+```
 
 Use wildcard implementation
     --gt-filters is (COLUMN).(SAMPLE_WILDCARD).(SAMPLE_WILDCARD_RULE).(RULE_ENFORCEMENT)
                      
 The previous command will be condensed down to:
 
+```
 gemini query -q "SELECT * FROM variants" \
                     --gt-filter "(gt_depths).(*).(>=20).(all)"
                     extended_ped.db
-                 
+```                 
 
 For more complex examples see: [Wildcard](http://gemini.readthedocs.org/en/latest/content/querying.html#gt-filter-wildcard-filtering-on-genotype-columns) section
 
