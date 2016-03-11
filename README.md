@@ -6,7 +6,7 @@ In this workshop, we will present the main steps involved in variant annotation 
 We will be working with the CEPH 1463 pedigree found on Illumina's baseSpace or EMBL repositories:
 http://www.1000genomes.org/data
 
-![pedigree](img/pedigree.png)
+![pedigree](img/pedigree.jpg)
 
 Due to time and resource restraints, 1000 variants around a known variant of interest from chromosome 10 was extracted.
 
