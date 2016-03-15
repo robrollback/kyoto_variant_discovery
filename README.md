@@ -16,13 +16,14 @@ This work is licensed under a [Creative Commons Attribution-ShareAlike 3.0 Unpor
 The initial structure of your folders should look like this:
 ```
 <ROOT>
+|-- bin/                     # contains environment setup script
 |-- variants/                # processed variants from the center (specific region)
     `-- ceph_pedigree        # CEPH pedigree directory. Contains the vcf file
     
 ```
 
 ###Cheat file
-* You can find all the unix command lines of this practical in the file: [commands.sh](script/command.sh)
+* You can find all the unix command lines of this practical in the file: [commands.sh](scripts/command.sh)
 
 ###Environment setup
 
@@ -65,7 +66,7 @@ These are all already installed, but here are the original links.
 
 Three samples from the CEPH pedigree have been sequenced and processed.  
 
-The raw data has been trimmed, quality read pairs mapped to the reference genome and the resulting bam files have been further processed using indel realigner, fixmates, and base recalibration. 
+The raw data has been trimmed, quality read pairs mapped to the reference genome and the resulting bam files have been further processed using indel realigner, fixmates, mark duplicates and base recalibration. 
 
 Variants were called with GATK haplotype caller in GVCF mode, and soft filtered using variant recalibration (VQSR). 
 
@@ -82,26 +83,30 @@ Try these commands:
 zcat cephPedigree.vqsr.vcf.gz | grep "^##"
 ``` 
 
-***What is the vcf format version?***
+**What is the vcf format version?**
 
-***What genome build was used for variant calling?***
+**What genome build was used for variant calling?**
 
-***What version of GATK Haplotype caller was used?*** 
+**What version of GATK Haplotype caller was used?**
 
-[Solutions](solutions/_vcf_header.md)
+[Solution](solutions/_vcf_header.md)
 
 **Explore the body of the vcf**
 ```
 zcat cephPedigree.vqsr.vcf.gz | grep -w -A1 "^#CHROM" 
 ```
 
-***How many samples are in this pedigree?*** [Solution](solutions/_vcf_body.md)
+**How many samples are in this pedigree?**
+
+[Solution](solutions/_vcf_body.md)
 
 ```
 zcat cephPedigree.vqsr.vcf.gz | grep -v "#" | wc -l 
 ```
 
-***How many variants are in this vcf file?*** [Solution](solutions/_vcf_variants.md)
+**How many variants are in this vcf file?**
+
+[Solution](solutions/_vcf_variants.md)
 
 #Preprocessing vcf file for Gemini (OPTIONAL)
 For best results, the vcf file requires further processing before loading and annotation with Gemini
@@ -115,7 +120,9 @@ Try command:
 zcat cephPedigree.vqsr.vcf.gz | sed 's/ID=AD,Number=./ID=AD,Number=R/' | $VT_HOME decompose -s - | $VT_HOME normalize -r $GENOME_FASTA - | bgzip -cf > cephPedigree.vqsr.vt.vcf.gz
 ```
 
-***How many variants were decomposed and normalized?*** Solution(solutions/_vt.md)
+**How many variants were decomposed and normalized?**
+
+[Solution](solutions/_vt.md)
 
 ### snpEff
 
@@ -151,7 +158,7 @@ Let's briefly go over some basic SQL syntax which will be used
 
 **Required:**
   * SELECT statement: fetch data and view from a table. Columns can be a list of comma-separated columns or an asterisk (*) to return all columns
-  * FROM clause: specifics the table to query from
+  * FROM clause: specifies the table to query from
 
 **Optional:**  
   * WHERE clause: filter rows in the result set
@@ -205,7 +212,7 @@ Output: (For more information see [column descriptions](http://gemini.readthedoc
 
 First let us check to database to make sure all variants are imported and the samples information is correct.
 
-Check the number of variants matches the number in of variants in the vcf
+Check the number of variants matches the number in of variants in the vcf using [gts-by-sample](http://gemini.readthedocs.org/en/latest/content/tools.html#stats-compute-useful-variant-statistics) function
 
 Try command:
 ```
@@ -232,7 +239,9 @@ gemini query -q "SELECT count(*) FROM samples WHERE gene = 'CYP2C19'" cephPedigr
 gemini query -q "SELECT count(*) FROM samples WHERE filter is NULL AND gene = 'CYP2C19'" cephPedigree.gemini.18.2.db
 ```
 
-***How many variants were remove using VQSR filtering?*** [Solution](solutions/_number_of_filtered_variants)
+***How many variants were remove using VQSR filtering?*** 
+
+[Solution](solutions/_number_of_filtered_variants)
 
 ```
 gemini stats --summarize "SELECT * FROM variants WHERE \ 
@@ -248,7 +257,7 @@ To identify variants that are associated or causal for a disease utilizing the C
 
 Try command:
 
-***Note:*** addition of clinvar_disease_name is not NULL, meaning to look for variants with a ClinVar annotation
+**Note:** addition of clinvar_disease_name is not NULL, meaning to look for variants with a ClinVar annotation
 
 ```
 gemini query --header -q "SELECT * FROM variants WHERE \
@@ -271,7 +280,9 @@ gemini query --header --show-samples -q "SELECT rs_ids, aaf_adj_exac_afr, aaf_ad
 
 ```
 
-***For this variant in which population(s) is this variant more frequent in?*** [Solution](solutions/_population.md)
+**For this variant in which population(s) is this variant more frequent in?**
+
+[Solution](solutions/_population.md)
 
 ```
     afr = African
@@ -280,7 +291,9 @@ gemini query --header --show-samples -q "SELECT rs_ids, aaf_adj_exac_afr, aaf_ad
     sas = South Asian
 ```
 
-***What are the genotypes for the three samples?*** [Solution](solutions/_sample_genotypes.md)
+**What are the genotypes for the three samples?**
+
+[Solution](solutions/_sample_genotypes.md)
 
 ##Variant Exploration 
 With a prior knowledge of the variant of interest, it is easy to find and validate the present of rs4244285

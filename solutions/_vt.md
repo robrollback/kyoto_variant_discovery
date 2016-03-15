@@ -1,11 +1,11 @@
 Decomposition:
 
-972 biallelic variants
- 28 multiallelic variants
+976 biallelic variants
+ 24 multiallelic variants
 
-Decompostion generated 32 additional variants
+Decompostion generated 28 additional variants
 
-Total number of variants 1032 
+Total number of variants 1028 
 
 Normalization:
 
