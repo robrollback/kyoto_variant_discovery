@@ -11,19 +11,10 @@ Due to time and resource constraints, we will provide 1000 preprocessed variants
 
 This work is licensed under a [Creative Commons Attribution-ShareAlike 3.0 Unported License](http://creativecommons.org/licenses/by-sa/3.0/deed.en_US). This means that you are able to copy, share and modify the work, as long as the result is distributed under the same license.
 
-##Setup Workspace
-
-The initial structure of your folders should look like this:
-```
-<ROOT>
-|-- bin/                     # contains environment setup script
-|-- variants/                # processed variants from the center (specific region)
-    `-- ceph_pedigree        # CEPH pedigree directory. Contains the vcf file
-    
-```
 
 ###Cheat file
 * You can find all the unix command lines of this practical in the file: [commands.sh](scripts/command.sh)
+
 
 ###Environment setup
 
@@ -50,6 +41,18 @@ cd variants/ceph_pedigree
 
 ```
 
+##Setup Workspace
+
+The initial structure of your folders should look like this:
+```
+<ROOT>
+|-- bin/                     # contains environment setup script
+|-- variants/                # processed variants from the center (specific region)
+    `-- ceph                 # CEPH pedigree directory. Contains the vcf file
+    
+```
+
+
 ###Software requirements
 These are all already installed, but here are the original links.
 
@@ -73,7 +76,7 @@ Variants were called with GATK haplotype caller in GVCF mode, and soft filtered 
 [CEPH1463 report]:(report/index.html)
     
 ### VCF file
-Exploring the vcf format
+Exploring the [vcf format](http://samtools.github.io/hts-specs/VCFv4.2.pdf)
 
 **Explore the header**
 
@@ -93,10 +96,10 @@ zcat cephPedigree.vqsr.vcf.gz | grep "^##"
 
 **Explore the body of the vcf**
 ```
-zcat cephPedigree.vqsr.vcf.gz | grep -w -A1 "^#CHROM" 
+zcat cephPedigree.vqsr.vcf.gz | grep -w -A2 "^#CHROM" 
 ```
 
-**How many samples are in this pedigree?**
+**How many samples in this vcf?**
 
 [Solution](solutions/_vcf_body.md)
 
@@ -128,13 +131,22 @@ zcat cephPedigree.vqsr.vcf.gz | sed 's/ID=AD,Number=./ID=AD,Number=R/' | $VT_HOM
 
 Try command:
 ```
-java -Xmx4G -jar $SNPEFF_HOME/snpEff.jar -formatEff -classic -lof \
+java -Xmx4G -jar $SNPEFF_HOME/snpEff.jar -classic -lof \
     -i vcf \
     -o vcf \
     GRCh37.75 \
     cephPedigree.vqsr.vt.vcf.gz | \
     bgzip -cf > cephPedigree.vqsr.vt.snpeff.vcf.gz
 ```    
+
+Copy snpEFF_summary.html to local and open in browser
+
+```
+scp -r <USER>@www.genome.med.kyoto-u.ac.jp:~/workshop_variants/variants/ceph/snpEFF_summary.html ./
+
+click on snpEFF_summary.html
+```
+
 
 ##Loading variants in Gemini
 
@@ -178,6 +190,7 @@ Gemini utilized SQL language as well as some uniquely coded agruments
 
 ```
 
+
 ###Explore Gemini tables
 
 Here we will explore the design or schema of the gemini databases; the collection of tables   
@@ -185,7 +198,7 @@ Here we will explore the design or schema of the gemini databases; the collectio
 Try command: 
 
 ```
-gemini db_info cephPedigree.gemini.18.2.db | column -t | less
+gemini db_info cephPedigree.gemini.18.2.db | column -t
 ```
 
 Output: (For more information see [column descriptions](http://gemini.readthedocs.org/en/latest/content/database_schema.html))
@@ -197,16 +210,8 @@ Output: (For more information see [column descriptions](http://gemini.readthedoc
         * samples
         * gene_detailed
         * gene_summary
-        
-    Note: each of these tables are connected to one or more tables using unique identifiers e.g.   
-    
-    types columns shows the type of information
-        * text - just plain text (e.g. "indels" or "SNP")
-        * integer - a whole number (e.g. "start" position)
-        * float - a number with decimal places (e.g. "call_rate")
-        * blob - special data type interpreted by Gemini (genotype data)
-        * bool - can be true or false
 ```
+
 
 ###Explore variants in Gemini (and data check)
 
@@ -225,53 +230,47 @@ Check that the sample information is correct
 gemini query --header -q "SELECT * FROM samples" cephPedigree.gemini.18.2.db | column -t
 ```
         
-###Count and summarize variants in Gemini
+###Count variants in CYP2C19 gene
 
-Count the number of CYP2C19 variants and summarize genotype counts for variants in CYP2C19 gene and have GATK VQSR PASS filter
+Count the number of CYP2C19 variants with and without GATK VQSR PASS filter
 
 Try commands:
 
 ```
-gemini query -q "SELECT count(*) FROM samples WHERE gene = 'CYP2C19'" cephPedigree.gemini.18.2.db
+gemini query -q "SELECT count(*) FROM variants WHERE gene = 'CYP2C19'" cephPedigree.gemini.18.2.db
 ```
 
 ```
-gemini query -q "SELECT count(*) FROM samples WHERE filter is NULL AND gene = 'CYP2C19'" cephPedigree.gemini.18.2.db
+gemini query -q "SELECT count(*) FROM variants WHERE filter is NULL AND gene = 'CYP2C19'" cephPedigree.gemini.18.2.db
 ```
 
 ***How many variants were remove using VQSR filtering?*** 
 
-[Solution](solutions/_number_of_filtered_variants)
-
-```
-gemini stats --summarize "SELECT * FROM variants WHERE \ 
-    filter is NULL \
-    AND gene = 'CYP2C19'" \
-    cephPedigree.gemini.18.2.db | column -t
-```
+[Solution](solutions/_number_of_filtered_variants.md)
 
     
-###Gemini querying - associations to a phenotype
+###Gemini querying with ClinVar
 
-To identify variants that are associated or causal for a disease utilizing the ClinVar database
+To identify CYP2C19 variant that are associated or causal for a disease utilizing the ClinVar database
 
 Try command:
-
-**Note:** addition of clinvar_disease_name is not NULL, meaning to look for variants with a ClinVar annotation
 
 ```
 gemini query --header -q "SELECT * FROM variants WHERE \
     clinvar_disease_name is not NULL \
-    AND filter is NULL" \
+    AND filter is NULL \
+    AND gene = 'CYP2C19'" \
     cephPedigree.gemini.18.2.db | column -t
 ```    
     
-Two variants are found with Clinvar annotations: [rs4244285](http://www.snpedia.com/index.php/Rs4244285) found in CYP2C19 and [rs1799853](https://www.snpedia.com/index.php/Rs1799853) found in CYP2C9 another p450 gene. 
+One variant is found in CYP2C19 with ClinVar annotations: [rs4244285](http://www.snpedia.com/index.php/Rs4244285)
+
+**We found the known variant!** 
     
-This generates a lot of columns let's focus the analysis to a specific set of columns related to dbsnp, the [ExAC](http://exac.broadinstitute.org/) control database, and ClinVar
+Unforunately this generates a lot of columns let's focus the analysis to a specific set of columns related to [dbsnp](http://www.ncbi.nlm.nih.gov/SNP/), snpEFF annotations, the [ExAC](http://exac.broadinstitute.org/) control database, and [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/)
 
 ```
-gemini query --header --show-samples -q "SELECT rs_ids, aaf_adj_exac_afr, aaf_adj_exac_amr, aaf_adj_exac_eas, aaf_adj_exac_sas, clinvar_disease_name, clinvar_sig \
+gemini query --header --show-samples -q "SELECT rs_ids, biotype, impact, impact_severity, aaf_adj_exac_afr, aaf_adj_exac_amr, aaf_adj_exac_eas, aaf_adj_exac_sas, clinvar_disease_name, clinvar_sig \
     FROM variants WHERE \ 
     clinvar_disease_name is not NULL \
     AND filter is NULL \
@@ -279,6 +278,11 @@ gemini query --header --show-samples -q "SELECT rs_ids, aaf_adj_exac_afr, aaf_ad
     cephPedigree.gemini.18.2.db | column -t 
 
 ```
+
+**What impact did snpEff assign to this variants?**
+
+[Solution](solutions/_snpeff.md)
+
 
 **For this variant in which population(s) is this variant more frequent in?**
 
@@ -304,7 +308,7 @@ Gemini provides tools and annotations to investigate these types of scenarios, b
 
     Study design e.g.
         * Pedigrees    :  de novo, autosomal recessive, autosomal dominant, compound heterozygotes, loss of heterozygosity
-        * Case-control :  variant level assocation tests, gene level burden/non-burden tests
+        * Case-control :  gene level burden/non-burden tests
 
     Hypotheses e.g. 
         * Complex disease : pathway analysis, protein interaction
@@ -315,78 +319,14 @@ Gemini provides tools and annotations to investigate these types of scenarios, b
         * Start with high impact variants or variants with high CADD or fitscon scores (variants predicted functional, deleterious and pathogentic variants)
         * Genomic features: if found within or near repeat regions, segmental duplications, etc.  Variant could be a false positive.
 
-###Pedigree exploration example
-For instance, with pedigree information we can identify non-mendelian transmission using [mendel_errors](http://gemini.readthedocs.org/en/latest/content/tools.html#mendelian-error-identify-non-mendelian-transmission) function
-
-This can identify
-   * Implausible de-novo mutations : Child is homozygous and parents are the same homozygotes and opposite to child 
-   * De-novo mutations             : Child is HET and parents are the same homozygotes
-   * Loss of Heterozygosity        : Parents are HET and homozygous and affect child is homogyzous 
-   * Uniparental disomy            : Parents are homzygote and opposite to each other. Child is same as one of the parents
-
-Try command:
-
-```
-gemini mendel_errors --columns "chrom, start, end, gene, rs_ids, impact, impact_severity, cadd_scaled, aaf_adj_exac_all, clinvar_disease_name, clinvar_sig, rmsk, in_cpg_island, in_segdup" \
-    cephPedigree.gemini.18.2.db \
-    --gt-pl-max 1 \
-    -d 20
-```           
-        
-###Advanced Gemini querying
-
-For each individual, Gemini gives access to genotype, depth, genotype quality and genotype likelihood at each variant.
-
-    gt_type.sampleID
-        * HOM_REF
-        * HET
-        * HOM_ALT
-        
-    gt_qual.sampleID
-        * genotype quality
-        
-    gt_depths.sampleID
-        * Total number of reads in this sample at position x
-    
-    gt_ref_depths.sampleID
-        * number of **reference allele** reads in this sample at position x
-        
-    gt_alt_depths.sampleID
-        * number of **alternate allele** reads in this sample at position x
-        
-Subsequently the per sample genotype information can be also be filtered upon using the --gt-filter option
-
-Examples:
-Instead of listing 100 threshold filters on depth like below 
-
-```
-gemini query -q "SELECT * FROM variants" \
-                    --gt-filter "gt_depths.sample1 >= 20 AND \
-                                  gt_depths.sample2 >= 20 AND \
-                                  gt_depths.sample3 >= 20 AND \
-                                  ...
-                                  gt_depths.sample100 >= 20" \
-                     extended_ped.db
-```
-
-Use wildcard implementation
-    --gt-filters is (COLUMN).(SAMPLE_WILDCARD).(SAMPLE_WILDCARD_RULE).(RULE_ENFORCEMENT)
-                     
-The previous command will be condensed down to:
-
-```
-gemini query -q "SELECT * FROM variants" \
-                    --gt-filter "(gt_depths).(*).(>=20).(all)"
-                    extended_ped.db
-```                 
-
-For more complex examples see: [Wildcard](http://gemini.readthedocs.org/en/latest/content/querying.html#gt-filter-wildcard-filtering-on-genotype-columns) section
+###Variant Exploration 
+Explore the variants data using the general guidelines state above
 
 Try command:
 ```
-gemini query --header --show-samples -q "SELECT chrom, start, end, gene, rs_ids, impact, impact_severity, cadd_scaled, aaf_adj_exac_all, clinvar_disease_name, clinvar_sig, rmsk, in_cpg_island, in_segdup FROM variants \
-                WHERE filter is NULL AND impact_severity <> 'LOW'"
-                --gt-filter "(gt_depths).(*).(>=20).(all)" test.db | column -t
+gemini query --header --show-samples -q "SELECT chrom, start, end, gene, rs_ids, gt_depths.(*) ,impact, impact_severity, cadd_scaled, aaf_adj_exac_all, clinvar_disease_name, clinvar_sig, rmsk, in_cpg_island, in_segdup FROM variants \
+                WHERE filter is NULL AND impact_severity <> 'LOW'" \
+                cephPedigree.gemini.18.2.db | column -t
     
 ```       
 
