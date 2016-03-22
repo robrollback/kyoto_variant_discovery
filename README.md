@@ -111,7 +111,7 @@ zcat cephPedigree.vqsr.vcf.gz | grep -v "#" | wc -l
 
 [Solution](solutions/_vcf_variants.md)
 
-#Preprocessing vcf file for Gemini (OPTIONAL)
+#Preprocessing vcf file for Gemini 
 For best results, the vcf file requires further processing before loading and annotation with Gemini
 
 Additionally, since we are working with a pedigree we can also provide a ped file to represent the metadata 
@@ -146,7 +146,6 @@ scp -r <USER>@www.genome.med.kyoto-u.ac.jp:~/workshop_variants/variants/ceph/snp
 
 click on snpEFF_summary.html
 ```
-
 
 ##Loading variants in Gemini
 
@@ -244,7 +243,7 @@ gemini query -q "SELECT count(*) FROM variants WHERE gene = 'CYP2C19'" cephPedig
 gemini query -q "SELECT count(*) FROM variants WHERE filter is NULL AND gene = 'CYP2C19'" cephPedigree.gemini.18.2.db
 ```
 
-***How many variants were remove using VQSR filtering?*** 
+**How many variants were remove using VQSR filtering?** 
 
 [Solution](solutions/_number_of_filtered_variants.md)
 
@@ -299,7 +298,7 @@ gemini query --header --show-samples -q "SELECT rs_ids, biotype, impact, impact_
 
 [Solution](solutions/_sample_genotypes.md)
 
-##Variant Exploration 
+##Guidelines for variant Exploration 
 With a prior knowledge of the variant of interest, it is easy to find and validate the present of rs4244285
 
 However, in cases where the answer is unknown, variant prioritization is not trivial. Study design and initial hypotheses will guide the exploration of the results.
@@ -319,7 +318,7 @@ Gemini provides tools and annotations to investigate these types of scenarios, b
         * Start with high impact variants or variants with high CADD or fitscon scores (variants predicted functional, deleterious and pathogentic variants)
         * Genomic features: if found within or near repeat regions, segmental duplications, etc.  Variant could be a false positive.
 
-###Variant Exploration 
+###Variant Exploration - general query 
 Explore the variants data using the general guidelines state above
 
 Try command:
@@ -330,4 +329,7 @@ gemini query --header --show-samples -q "SELECT chrom, start, end, gene, rs_ids,
     
 ```       
 
+**How many variants were identified?** 
+
+[Solution](solutions/_variant_explore.md)
 

@@ -1,22 +1,22 @@
 ##Setup
 
 cd $HOME
-rsync -avP /home/reveleigh/cleanCopy/variants $HOME/workshop
-cd $HOME/workshop
+rsync -avP /home/reveleigh/cleanCopy/workshop_variants $HOME/workshop_variants
+cd $HOME/workshop_variants
 
-ls -lhtr variants/
+ls -lhtr $HOME/workshop_variants
 
-cd $HOME/workshop
+cd $HOME/workshop_variants
 
 source bin/var_ann_config.sh
 
-cd variants/ceph_pedigree
+cd ceph
 
 ##VCF format
 
 zcat cephPedigree.vqsr.vcf.gz | grep "^##"
 
-zcat cephPedigree.vqsr.vcf.gz | grep -w -A1 "^#CHROM"
+zcat cephPedigree.vqsr.vcf.gz | grep -w -A2 "^#CHROM"
 
 zcat cephPedigree.vqsr.vcf.gz | grep -v "#" | wc -l 
 
