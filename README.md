@@ -20,7 +20,7 @@ This work is licensed under a [Creative Commons Attribution-ShareAlike 3.0 Unpor
 
 ```
 cd $HOME
-rsync -avP /home/reveleigh/cleanCopy/workshop_variants $HOME/workshop_variants
+rsync -avP /home/reveleigh/cleanCopy/workshop_variants $HOME/
 cd $HOME/workshop_variants
 
 ls -lhtr $HOME/workshop_variants
