@@ -20,24 +20,21 @@ This work is licensed under a [Creative Commons Attribution-ShareAlike 3.0 Unpor
 
 ```
 cd $HOME
-rsync -avP /home/reveleigh/cleanCopy/variants $HOME/workshop
-cd $HOME/workshop
+rsync -avP /home/reveleigh/cleanCopy/workshop_variants $HOME/workshop_variants
+cd $HOME/workshop_variants
 
-ls -lhtr variants/
+ls -lhtr $HOME/workshop_variants
 
-cd $HOME/workshop/bin
+cd $HOME/workshop_variants
 
-cat var_ann_config.sh:
-    export GENOME_FASTA=
-    export HTSLIBS=
-    export VT_HOME=
-    export SNPEFF_HOME=
-    export GEMINI_HOME=
-    export GEMINI_LIBS=
+cat bin/var_ann_config.sh:
+    export GENOME_FASTA=/home/mBourgey/kyoto_workshop_WGS_2015/references/
+    export SNPEFF=/usr/local/bin/snpEff.jar
+   
 
-source var_ann_config.sh
+source bin/var_ann_config.sh
 
-cd variants/ceph_pedigree
+cd variants/ceph
 
 ```
 
@@ -46,9 +43,8 @@ cd variants/ceph_pedigree
 The initial structure of your folders should look like this:
 ```
 <ROOT>
-|-- bin/                     # contains environment setup script
-|-- variants/                # processed variants from the center (specific region)
-    `-- ceph                 # CEPH pedigree directory. Contains the vcf file
+|-- bin/                          # contains environment setup script
+|-- ceph/                         # CEPH pedigree directory. Contains the VQSR filtered vcf file
     
 ```
 
@@ -120,7 +116,7 @@ Additionally, since we are working with a pedigree we can also provide a ped fil
 
 Try command:
 ```
-zcat cephPedigree.vqsr.vcf.gz | sed 's/ID=AD,Number=./ID=AD,Number=R/' | $VT_HOME decompose -s - | $VT_HOME normalize -r $GENOME_FASTA - | bgzip -cf > cephPedigree.vqsr.vt.vcf.gz
+zcat cephPedigree.vqsr.vcf.gz | sed 's/ID=AD,Number=./ID=AD,Number=R/' | vt decompose -s - | vt normalize -r $GENOME_FASTA/b37.fasta - | bgzip -cf > cephPedigree.vqsr.vt.vcf.gz
 ```
 
 **How many variants were decomposed and normalized?**
@@ -131,7 +127,7 @@ zcat cephPedigree.vqsr.vcf.gz | sed 's/ID=AD,Number=./ID=AD,Number=R/' | $VT_HOM
 
 Try command:
 ```
-java -Xmx4G -jar $SNPEFF_HOME/snpEff.jar -classic -lof \
+java -Xmx4G -jar $SNPEFF -classic -lof \
     -i vcf \
     -o vcf \
     GRCh37.75 \
@@ -298,8 +294,8 @@ gemini query --header --show-samples -q "SELECT rs_ids, biotype, impact, impact_
 
 [Solution](solutions/_sample_genotypes.md)
 
-##Guidelines for variant Exploration 
-With a prior knowledge of the variant of interest, it is easy to find and validate the present of rs4244285
+##Guidelines for Variant Exploration 
+With a prior knowledge of the variant of interest, it is easy to find and validate the present of [rs4244285](http://www.snpedia.com/index.php/Rs4244285)
 
 However, in cases where the answer is unknown, variant prioritization is not trivial. Study design and initial hypotheses will guide the exploration of the results.
 
