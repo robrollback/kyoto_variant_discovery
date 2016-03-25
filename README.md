@@ -28,13 +28,10 @@ ls -lhtr $HOME/workshop_variants
 cd $HOME/workshop_variants
 
 cat bin/var_ann_config.sh:
-    export GENOME_FASTA=/home/mBourgey/kyoto_workshop_WGS_2015/references/
-    export SNPEFF=/usr/local/bin/snpEff.jar
-   
 
 source bin/var_ann_config.sh
 
-cd variants/ceph
+cd ceph
 
 ```
 
